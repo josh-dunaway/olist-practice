@@ -45,3 +45,135 @@ sources:
             tests:
               - unique
               - not_null
+          - name: zip
+            description: seller zip code prefix - foreign key to geolocation table
+          - name: city
+            description: seller city
+          - name: state
+            description: seller state
+      - name: orders
+        identifier: olist_orders_dataset
+        description: info for orders such as customer, date, and delivery info
+        columns:
+          - name: order_id
+            description: primary key
+            tests:
+              - unique
+              - not_null
+          - name: customer_id
+            description: id of customer - foreign key to customers table
+          - name: status
+            description: order status - possible values - approved, canceled, created, delivered, invoiced, processing, shipped, unavailable
+          - name: purchase_timestamp
+            description: when the purchase was made by the customer
+          - name: approved_at
+            description: when the purchase was approved
+          - name: delivered_carrier_date
+            description: when the order was delivered to the carrier?
+          - name: delivered_customer_date
+            description: when the order was delivered to the customer?
+          - name: estimated_delivery_date
+            description: estimated delivery date presented to customer at time of purchase?
+      - name: order_items
+        identifier: olist_order_items_dataset
+        description: info about each product in an order - seller, product price, shipping limit date, freight value
+        columns:
+          - name: order_id
+            description: combined primary key with order_item_id
+            tests:
+              - not_null
+          - name: order_item_id
+            description: unique number for each product in the order.. multiple of same product still get unique numbers
+            tests:
+              - not_null
+          - name: product_id
+            description: foreign key to products table
+            tests:
+              - not_null
+          - name: seller_id
+            description: foreign key to the sellers table
+            tests:
+              - not_null
+          - name: shipping_limit_date
+            description: a date that the seller must ship by?
+          - name: price
+            description: price of each individual item
+          - name: freight_value
+            description: the weight of the item?
+        tests:
+          - unique:
+              columns_name: "(order_id|order_item_id)"
+      - name: order_reviews
+        identifier: olist_order_reviews_dataset
+        description: customer review of the order
+        columns:
+          - name: review_id
+            description: id for review which can contain multiple orders.. each order gets its own score.. part of primary key (along with order_id)
+            tests:
+              - not_null
+          - name: order_id
+            description: which order the review is for - foreign key to orders and order_items - part of primary key (along with review_id)
+            tests:
+              - not_null
+          - name: score
+            description: scale of 1-5 that user gives order
+          - name: date_created
+            description: timestamp that review was created but not necessarily answered
+          - name: date_answered
+            description: timestamp that review was answered by the customer
+        tests:
+          - unique:
+              columns_name: "(review_id|order_id)"            
+      - name: order_payments
+        identifier: olist_order_payments_dataset
+        description: payment types and amounts (including paying in parts) of each order
+        columns:
+          - name: order_id
+            description: foreign key to orders and orders_items table
+            tests:
+              - not_null
+          - name: payment_sequential
+            description: which installment is being paid.. not guaranteed to be less than payment_installments
+            tests:
+              - not_null
+          - name: type
+            description: method of payment - current possible values include credit card, voucher, not defined, boleto, and debit card
+          - name: nb_installments
+            description: number of installments if customer using payment plan - doesn't seem to be a hard limit as some customers make more payments than their installments
+          - name: value
+            description: how much was paid (assume in Brazilian Real?)
+        tests:
+          - unique:
+              columns_name: "(order_id|payment_sequential)"
+      - name: products
+        identifier: olist_products_dataset
+        description: underwhelming info about each product including category and dimensions
+        columns:
+          - name: product_id
+            description: primary key
+            tests:
+              - not_null
+          - name: category
+            description: general category of the product (in portuguese)
+          - name: name_length
+            description: number of characters in the product name? (where the heck is that located??)
+          - name: description_length
+            description: number of characters in the product description? (where the heck is that located??)
+          - name: photos_qty
+            description: number of photos of product?
+          - name: weight_g
+            description: weight in grams
+          - name: length_cm
+            description: length in cm
+          - name: height_cm
+            description: height in cm
+          - name: width_cm
+            description: width in cm
+      - name: product_category_translations
+        identifier: olist_product_category_name_translation
+        description: translation from portuguese to englsh
+        columns:
+          - name: category_portuguese
+            description: original category in portuguese
+          - name: category_english
+            description: category translated to english

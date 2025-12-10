@@ -1,0 +1,47 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: Olist
+    tables:
+      - name: customers
+        identifier: olist_customers_dataset
+        description: contains geographic information on the customer
+        columns:
+          - name: customer_id
+            description: primary key 
+            tests:
+              - unique
+              - not_null
+          - name: zip_code_prefix
+            description: foreign key for geolocation table
+          - name: city
+            description: also foreign key for geolocation dataset although zip_code_prefix should suffice
+          - name: state
+            description: also foreign key for geolocation dataset although zip_code_prefix should suffice
+      - name: geolocation
+        identifier: olist_geolocation_dataset
+        description: a list of lat/lon combos (with zip code prefix, city, and state) locating customers and sellers 
+        columns:
+          - name: zip_code_prefix
+            description: foreign key for customers and sellers tables
+          - name: latitude
+            description: latitude - 1/2 of primary key
+          - name: longitude
+            description: longitude - 1/2 of primary key
+          - name: city
+            description: city of lat/lon combo
+          - name: state
+            description: state of lat/lon combo
+        tests:
+          - unique:
+              columns_name: "(geolocation_lat|geolocation_lng)"
+      - name: sellers
+        identifier: olist_sellers_dataset
+        description: contains geographic location of sellers
+        columns:
+          - name: id
+            description: primary key - id for seller
+            tests:
+              - unique
+              - not_null
